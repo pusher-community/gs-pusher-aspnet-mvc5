@@ -1,21 +1,23 @@
 ﻿using PusherServer;
 using System;
 using System.IO;
+using System.Net;
+using System.Web.Configuration;
 using System.Web.Mvc;
 
 namespace Pusher_ASP.NET_MVC_5_Getting_Started.Controllers
 {
     public class HomeController : Controller
     {
-        private const string APP_ID = "YOUR_APP_ID";
-        private const string APP_KEY = "YOUR_APP_KEY";
-        private const string APP_SECRET = "YOUR_APP_SECRET";
-
         Pusher _pusher;
+
+        private readonly string appId = WebConfigurationManager.AppSettings["pusherAppId"];
+        private readonly string appKey = WebConfigurationManager.AppSettings["pusherAppKey"];
+        private readonly string appSecret = WebConfigurationManager.AppSettings["pusherAppSecret"];
 
         public HomeController()
         {
-            _pusher = new Pusher(APP_ID, APP_KEY, APP_SECRET);
+            _pusher = new Pusher(appId, appKey, appSecret);
         }
 
         public ActionResult Index()
@@ -23,10 +25,49 @@ namespace Pusher_ASP.NET_MVC_5_Getting_Started.Controllers
             return View();
         }
 
+        [Route("private-channel-example")]
+        public ActionResult PrivateChannelExample()
+        {
+            ViewBag.appKey = appKey;
+            return View("PrivateChannelAuth");
+        }
+
         [HttpGet]
         public ActionResult Test()
         {
             return new HttpStatusCodeResult(200);
+        }
+
+        [HttpPost, Route("pusher/auth")]
+        public ActionResult Auth()
+        {
+            var channelName = Request.Form["channel_name"];
+            var socketId = Request.Form["socket_id"];
+
+            IAuthenticationData auth = null;
+
+            if(channelName.StartsWith("private-"))
+            {
+                auth = _pusher.Authenticate(channelName, socketId);
+            }
+            else if(channelName.StartsWith("private-"))
+            {
+                auth = _pusher.Authenticate(channelName, socketId, GetUserChannelData());
+            }
+            else
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            return new JsonResult()
+            {
+                Data = auth
+            };
+        }
+
+        private PresenceChannelData GetUserChannelData()
+        {
+            throw new NotImplementedException();
         }
 
         [HttpPost]

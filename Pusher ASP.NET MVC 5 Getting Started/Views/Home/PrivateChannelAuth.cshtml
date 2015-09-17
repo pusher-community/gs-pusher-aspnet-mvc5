@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewBag.Title = "PrivateChannelAuth";
+}
+
+<h2>PrivateChannelAuth</h2>
+
+<p>Please open the JavaScript console in the browser to see the results of the JavaScript in the source of this page.</p>
+
+<script src="//js.pusher.com/3.0/pusher.min.js"></script>
+<script>
+    Pusher.log = function (msg) {
+        console.log(msg);
+    };
+
+    var options = {
+        authEndpoint: '/'
+    }
+    var pusher = new Pusher('@ViewBag.appKey');
+    var privateChannel = pusher.subscribe('private-my-channel');
+
+    privateChannel.bind('pusher:subscription_succeeded', function () {
+        console.log('Yipee!');
+    });
+
+    privateChannel.bind('pusher:subscription_failed', function () {
+        console.log('Oh no!')
+    });
+</script>
