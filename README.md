@@ -23,7 +23,7 @@ The solutions should now build and run.
 ## Done
 
 * Processing & validating WebHooks
-* Private channel subscription authentication *TODO*
+* Private channel subscription authentication
 
 ## Todo
 
